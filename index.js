@@ -60,20 +60,20 @@ const employees = [
 app.use(bodyParser.json());
 
 // API to filter by department
-app.get('/api/filter/:department', (req, res) => {
+app.get('/filter/:department', (req, res) => {
   const department = req.params.department;
   const filteredEmployees = employees.filter(employee => employee.department === department);
   res.json(filteredEmployees);
 });
 
 // API to sort by salary
-app.get('/api/sort/salary', (req, res) => {
+app.get('/sort/salary', (req, res) => {
   const sortedEmployees = employees.slice().sort((a, b) => a.salary - b.salary);
   res.json(sortedEmployees);
 });
 
 // API to search by employee_id
-app.get('/api/search/:employee_id', (req, res) => {
+app.get('/search/:employee_id', (req, res) => {
   const employee_id = req.params.employee_id;
   const employee = employees.find(employee => employee.employee_id === employee_id);
   
