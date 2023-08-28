@@ -1,88 +1,78 @@
-// Create a basic endpoints using node. use the following schema for same.
 
-// 1) Create a API to filter by department.
-// 2) Create a API to sort by salary.
-// 3) Create a API to search by employee_id.
-
-// {
-// employee_id:'123'
-// first_name:"xyz",
-// last_name:"xyz",
-// department:"IT",
-// Address:"xyz",
-// hire_date:"01-02-2023",
-// dob:"01-02-2012",
-// joiningDate:"20-02-2023",
-// salary:'123'
-// }
 
 const express = require('express');
 const bodyParser = require('body-parser');
+const axios=require('axios')
 const app = express();
 const PORT = 3000; // You can change the port if needed
+var cors = require('cors')
 
+app.use(cors())
 // Sample data
-const employees = [
-  {
-    employee_id: '123',
-    first_name: 'xyz',
-    last_name: 'xyz',
-    department: 'IT',
-    Address: 'xyz',
-    hire_date: '01-02-2023',
-    dob: '01-02-2012',
-    joiningDate: '20-02-2023',
-    salary: '123',
-  },{
-    employee_id: '321',
-    first_name: 'erf',
-    last_name: 'erg',
-    department: 'Market',
-    Address: 'xyz',
-    hire_date: '01-02-2023',
-    dob: '01-02-2012',
-    joiningDate: '20-02-2023',
-    salary: '123',
-  },{
-    employee_id: '654',
-    first_name: 'sdfsdf',
-    last_name: 'sdfdfv',
-    department: 'Support',
-    Address: 'xyz',
-    hire_date: '01-02-2023',
-    dob: '01-02-2012',
-    joiningDate: '20-02-2023',
-    salary: '123',
-  },
-  // Add more employee objects here
-];
 
 app.use(bodyParser.json());
 
-// API to filter by department
-app.get('/filter/:department', (req, res) => {
-  const department = req.params.department;
-  const filteredEmployees = employees.filter(employee => employee.department === department);
-  res.json(filteredEmployees);
-});
+app.post('/change_pswd',(req,res)=>{
+  console.log('runnss');
 
-// API to sort by salary
-app.get('/sort/salary', (req, res) => {
-  const sortedEmployees = employees.slice().sort((a, b) => a.salary - b.salary);
-  res.json(sortedEmployees);
-});
+  const url = `https://org2-pro-prem-y0bh.oktapreview.com/api/v1/users/${req.body.id}/credentials/forgot_password?sendEmail=false`;
+  const config = {
+    headers:{
+        Authorization: `SSWS 0097tfqHB1X0BwoMdmR4j-yRoGEyFhoGyO0t9UagN3`,
 
-// API to search by employee_id
-app.get('/search/:employee_id', (req, res) => {
-  const employee_id = req.params.employee_id;
-  const employee = employees.find(employee => employee.employee_id === employee_id);
-  
-  if (employee) {
-    res.json(employee);
-  } else {
-    res.status(404).json({ error: 'Employee not found' });
+    }
+  };
+  let data={
+    password: { value: req.body.pswd }, 
+      recovery_question: { answer:req.body.r_q } 
   }
-});
+  console.log('runn2');
+
+  axios.post(url,data,config)
+  .then(response => {
+    const data = response.data;
+   console.log(data);
+   res.send('Password Change succesfully')
+  })
+  .catch(error => {
+    console.error('Error fetching data:', error);
+    res.send('Something went wrong')
+
+  });
+})
+app.post('/data',(req,res)=>{
+  const url = `https://org2-pro-prem-y0bh.oktapreview.com/api/v1/users?search=profile.emp_id eq "${req.body.id}"`;
+//console.log(req.body);
+
+const headers = {
+  Authorization: `SSWS 0097tfqHB1X0BwoMdmR4j-yRoGEyFhoGyO0t9UagN3`,
+};
+const config = {
+    headers:{
+        Authorization: `SSWS 0097tfqHB1X0BwoMdmR4j-yRoGEyFhoGyO0t9UagN3`,
+
+    }
+  };
+
+axios.get(url,config)
+  .then(response => {
+    const data = response.data;
+    if (data.length > 0) {
+      const user = data[0];
+      const securityQuestions = user.credentials.recovery_question;
+      console.log(securityQuestions,'sdfhsb');
+      res.send(data);
+    } else {
+      console.log('User not found.');
+    }
+  })
+  .catch(error => {
+    console.error('Error fetching data:', error);
+    res.send('Something went wrong')
+
+  });
+
+})
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
